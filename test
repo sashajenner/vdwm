@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Create application containing entire X display for testing
-Xephyr -ac -screen 1920x1080 -br -reset -terminate 2> /dev/null :1 &
+Xephyr -ac -screen 1920x1050 -br -reset -terminate 2> /dev/null :1 &
 DISPLAY=:1
 
 # Sleep before running
