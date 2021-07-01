@@ -113,8 +113,8 @@ typedef struct {
 
 typedef struct {
 	const char *symbol;
-    const Key *keys;
-    const unsigned int nkeys;
+	const Key *keys;
+	const unsigned int nkeys;
 } Mode;
 
 struct Monitor {
@@ -181,7 +181,7 @@ static int getrootptr(int *x, int *y);
 static long getstate(Window w);
 static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void grabbuttons(Client *c, int focused);
-static void grabkeys(const Key *keys, unsigned int length);
+static void grabkeys(const Key *keys, unsigned int nkeys);
 static void incnmaster(const Arg *arg);
 static void keypress(XEvent *e);
 static void killclient(const Arg *arg);
@@ -208,8 +208,8 @@ static void setclientstate(Client *c, long state);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
 static void setlayout(const Arg *arg);
-static void setmode(const Arg *arg);
 static void setmfact(const Arg *arg);
+static void setmode(const Arg *arg);
 static void setup(void);
 static void seturgent(Client *c, int urg);
 static void showhide(Client *c);
@@ -1527,21 +1527,6 @@ setlayout(const Arg *arg)
 		drawbar(selmon);
 }
 
-void
-setmode(const Arg *arg)
-{
-    Monitor *m;
-
-    if (arg && arg->v) {
-        selmd = (Mode *)arg->v;
-        grabkeys(selmd->keys, selmd->nkeys);
-        for (m = mons; m; m = m->next) {
-            strncpy(m->mdsymbol, selmd->symbol, sizeof m->mdsymbol);
-            drawbar(m);
-        }
-    }
-}
-
 /* arg > 1.0 will set mfact absolutely */
 void
 setmfact(const Arg *arg)
@@ -1555,6 +1540,22 @@ setmfact(const Arg *arg)
 		return;
 	selmon->mfact = f;
 	arrange(selmon);
+}
+
+void
+setmode(const Arg *arg)
+{
+	Monitor *m;
+
+	if (arg && arg->v) {
+		selmd = (Mode *)arg->v;
+		if (selmd->keys)
+			grabkeys(selmd->keys, selmd->nkeys);
+		for (m = mons; m; m = m->next) {
+			strncpy(m->mdsymbol, selmd->symbol, sizeof m->mdsymbol);
+			drawbar(m);
+		}
+	}
 }
 
 void
@@ -1626,7 +1627,9 @@ setup(void)
 		|LeaveWindowMask|StructureNotifyMask|PropertyChangeMask;
 	XChangeWindowAttributes(dpy, root, CWEventMask|CWCursor, &wa);
 	XSelectInput(dpy, root, wa.event_mask);
-    grabkeys(selmd->keys, selmd->nkeys);
+    if (selmd->keys) {
+        grabkeys(selmd->keys, selmd->nkeys);
+    }
 	focus(NULL);
 }
 

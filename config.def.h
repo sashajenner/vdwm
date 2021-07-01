@@ -144,13 +144,12 @@ static Key normkeys[] = {
 	{ 0,                            XK_i,      setmode,        {.v = &modes[1]} },
 };
 
-#define BIND(KEYS) KEYS, LENGTH(KEYS)
-
+#define ALLBIND(KEYS) KEYS, LENGTH(KEYS)
 /* mode(s) */
 static const Mode modes[NMODE] = {
-	/* symbol    keys bindings */                                   // TODO add a unbind other keys option
-    { "",        BIND(normkeys) }, /* first entry is default */     // TODO test this is true
-    { "INS",     BIND(inskeys) },
+	/* symbol    keys             */                                   // TODO add a unbind other keys option
+	{ "",        ALLBIND(normkeys) }, /* first entry is default */     // TODO test this is true
+	{ "INS",     ALLBIND(inskeys)  },
 };
 
 /* button definitions */
