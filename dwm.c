@@ -111,8 +111,15 @@ typedef struct {
 	void (*arrange)(Monitor *);
 } Layout;
 
+typedef struct {
+	const char *symbol;
+    const Key *keys;
+    const unsigned int nkeys;
+} Mode;
+
 struct Monitor {
 	char ltsymbol[16];
+	char mdsymbol[16];    /* mode symbol */
 	float mfact;
 	int nmaster;
 	int num;
@@ -174,7 +181,7 @@ static int getrootptr(int *x, int *y);
 static long getstate(Window w);
 static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void grabbuttons(Client *c, int focused);
-static void grabkeys(void);
+static void grabkeys(const Key *keys, unsigned int length);
 static void incnmaster(const Arg *arg);
 static void keypress(XEvent *e);
 static void killclient(const Arg *arg);
@@ -201,6 +208,7 @@ static void setclientstate(Client *c, long state);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
 static void setlayout(const Arg *arg);
+static void setmode(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setup(void);
 static void seturgent(Client *c, int urg);
@@ -267,6 +275,7 @@ static Clr **scheme;
 static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;
+static const Mode *selmd;
 static Window root, wmcheckwin;
 
 /* configuration, allows nested code to access above variables */
@@ -642,6 +651,7 @@ createmon(void)
 	m->lt[0] = &layouts[0];
 	m->lt[1] = &layouts[1 % LENGTH(layouts)];
 	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
+	strncpy(m->mdsymbol, selmd->symbol, sizeof m->mdsymbol);
 	return m;
 }
 
@@ -728,6 +738,10 @@ drawbar(Monitor *m)
 	w = blw = TEXTW(m->ltsymbol);
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
+
+    // TODO is this ok?
+	w = blw = TEXTW(m->mdsymbol);
+	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->mdsymbol, 0);
 
 	if ((w = m->ww - tw - x) > bh) {
 		if (m->sel) {
@@ -947,7 +961,7 @@ grabbuttons(Client *c, int focused)
 }
 
 void
-grabkeys(void)
+grabkeys(const Key *keys, unsigned int nkeys)
 {
 	updatenumlockmask();
 	{
@@ -956,7 +970,7 @@ grabkeys(void)
 		KeyCode code;
 
 		XUngrabKey(dpy, AnyKey, AnyModifier, root);
-		for (i = 0; i < LENGTH(keys); i++)
+		for (i = 0; i < nkeys; i++)
 			if ((code = XKeysymToKeycode(dpy, keys[i].keysym)))
 				for (j = 0; j < LENGTH(modifiers); j++)
 					XGrabKey(dpy, code, keys[i].mod | modifiers[j], root,
@@ -989,10 +1003,11 @@ keypress(XEvent *e)
 	unsigned int i;
 	KeySym keysym;
 	XKeyEvent *ev;
+    const Key *keys = selmd->keys;
 
 	ev = &e->xkey;
 	keysym = XKeycodeToKeysym(dpy, (KeyCode)ev->keycode, 0);
-	for (i = 0; i < LENGTH(keys); i++)
+	for (i = 0; i < selmd->nkeys; i++)
 		if (keysym == keys[i].keysym
 		&& CLEANMASK(keys[i].mod) == CLEANMASK(ev->state)
 		&& keys[i].func)
@@ -1083,8 +1098,8 @@ mappingnotify(XEvent *e)
 	XMappingEvent *ev = &e->xmapping;
 
 	XRefreshKeyboardMapping(ev);
-	if (ev->request == MappingKeyboard)
-		grabkeys();
+	if (ev->request == MappingKeyboard && selmd->keys)
+		grabkeys(selmd->keys, selmd->nkeys);
 }
 
 void
@@ -1512,6 +1527,21 @@ setlayout(const Arg *arg)
 		drawbar(selmon);
 }
 
+void
+setmode(const Arg *arg)
+{
+    Monitor *m;
+
+    if (arg && arg->v) {
+        selmd = (Mode *)arg->v;
+        grabkeys(selmd->keys, selmd->nkeys);
+        for (m = mons; m; m = m->next) {
+            strncpy(m->mdsymbol, selmd->symbol, sizeof m->mdsymbol);
+            drawbar(m);
+        }
+    }
+}
+
 /* arg > 1.0 will set mfact absolutely */
 void
 setmfact(const Arg *arg)
@@ -1536,6 +1566,9 @@ setup(void)
 
 	/* clean up any zombies immediately */
 	sigchld(0);
+
+    /* init mode */
+    selmd = &modes[0];
 
 	/* init screen */
 	screen = DefaultScreen(dpy);
@@ -1593,7 +1626,7 @@ setup(void)
 		|LeaveWindowMask|StructureNotifyMask|PropertyChangeMask;
 	XChangeWindowAttributes(dpy, root, CWEventMask|CWCursor, &wa);
 	XSelectInput(dpy, root, wa.event_mask);
-	grabkeys();
+    grabkeys(selmd->keys, selmd->nkeys);
 	focus(NULL);
 }
 
@@ -1640,7 +1673,7 @@ sigchld(int unused)
 void
 spawn(const Arg *arg)
 {
-	if (arg->v == dmenucmd)
+	if (arg->v == dmenucmd || arg->v == vdwmcmd)
 		dmenumon[0] = '0' + selmon->num;
 	if (fork() == 0) {
 		if (dpy)
