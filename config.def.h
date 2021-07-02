@@ -62,9 +62,9 @@ static const char *termcmd[]  = { "st", NULL };
 
 /* mode definitions */
 #define NMODE (2) /* number of modes */
-static const Mode modes[NMODE];
+static const Mode modes[NMODE]; // TODO is this bad?
 
-static Key inskeys[] = {
+static Key insertkeys[] = {
 	/* modifier                     key        function        argument */
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
@@ -103,7 +103,7 @@ static Key inskeys[] = {
 	{ MODKEY,                       XK_Escape, setmode,        {.v = &modes[0]} },
 };
 
-static Key normkeys[] = {
+static Key normalkeys[] = {
 	/* modifier                     key        function        argument */
 	{ 0,                            XK_p,      spawn,          {.v = dmenucmd } },
 	{ ShiftMask,                    XK_Return, spawn,          {.v = termcmd } },
@@ -147,9 +147,9 @@ static Key normkeys[] = {
 #define ALLBIND(KEYS) KEYS, LENGTH(KEYS)
 /* mode(s) */
 static const Mode modes[NMODE] = {
-	/* symbol    keys             */                                   // TODO add a unbind other keys option
-	{ "",        ALLBIND(normkeys) }, /* first entry is default */     // TODO test this is true
-	{ "INS",     ALLBIND(inskeys)  },
+	/* symbol    key bindings            allow other keys */
+	{ "",        ALLBIND(normalkeys),    0 }, /* first entry is default */
+	{ "INS",     ALLBIND(insertkeys),    1 },
 };
 
 /* button definitions */

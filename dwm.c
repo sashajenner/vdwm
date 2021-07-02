@@ -113,8 +113,9 @@ typedef struct {
 
 typedef struct {
 	const char *symbol;
-	const Key *keys;
-	const unsigned int nkeys;
+	Key *keys;
+	unsigned int nkeys;
+    int other;
 } Mode;
 
 struct Monitor {
@@ -181,7 +182,7 @@ static int getrootptr(int *x, int *y);
 static long getstate(Window w);
 static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void grabbuttons(Client *c, int focused);
-static void grabkeys(const Key *keys, unsigned int nkeys);
+static void grabkeys(const Key *keys, unsigned int nkeys, int other);
 static void incnmaster(const Arg *arg);
 static void keypress(XEvent *e);
 static void killclient(const Arg *arg);
@@ -961,20 +962,24 @@ grabbuttons(Client *c, int focused)
 }
 
 void
-grabkeys(const Key *keys, unsigned int nkeys)
+grabkeys(const Key *keys, unsigned int nkeys, int other)
 {
 	updatenumlockmask();
 	{
-		unsigned int i, j;
-		unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
-		KeyCode code;
+        if (other) {
+            unsigned int i, j;
+            unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
+            KeyCode code;
 
-		XUngrabKey(dpy, AnyKey, AnyModifier, root);
-		for (i = 0; i < nkeys; i++)
-			if ((code = XKeysymToKeycode(dpy, keys[i].keysym)))
-				for (j = 0; j < LENGTH(modifiers); j++)
-					XGrabKey(dpy, code, keys[i].mod | modifiers[j], root,
-						True, GrabModeAsync, GrabModeAsync);
+            XUngrabKey(dpy, AnyKey, AnyModifier, root);
+            if (keys)
+                for (i = 0; i < nkeys; i++)
+                    if ((code = XKeysymToKeycode(dpy, keys[i].keysym)))
+                        for (j = 0; j < LENGTH(modifiers); j++)
+                            XGrabKey(dpy, code, keys[i].mod | modifiers[j], root,
+                                True, GrabModeAsync, GrabModeAsync);
+        } else
+            XGrabKey(dpy, AnyKey, AnyModifier, root, True, GrabModeAsync, GrabModeAsync);
 	}
 }
 
@@ -1098,8 +1103,8 @@ mappingnotify(XEvent *e)
 	XMappingEvent *ev = &e->xmapping;
 
 	XRefreshKeyboardMapping(ev);
-	if (ev->request == MappingKeyboard && selmd->keys)
-		grabkeys(selmd->keys, selmd->nkeys);
+	if (ev->request == MappingKeyboard)
+		grabkeys(selmd->keys, selmd->nkeys, selmd->other);
 }
 
 void
@@ -1549,8 +1554,7 @@ setmode(const Arg *arg)
 
 	if (arg && arg->v) {
 		selmd = (Mode *)arg->v;
-		if (selmd->keys)
-			grabkeys(selmd->keys, selmd->nkeys);
+        grabkeys(selmd->keys, selmd->nkeys, selmd->other);
 		for (m = mons; m; m = m->next) {
 			strncpy(m->mdsymbol, selmd->symbol, sizeof m->mdsymbol);
 			drawbar(m);
@@ -1627,9 +1631,7 @@ setup(void)
 		|LeaveWindowMask|StructureNotifyMask|PropertyChangeMask;
 	XChangeWindowAttributes(dpy, root, CWEventMask|CWCursor, &wa);
 	XSelectInput(dpy, root, wa.event_mask);
-    if (selmd->keys) {
-        grabkeys(selmd->keys, selmd->nkeys);
-    }
+    grabkeys(selmd->keys, selmd->nkeys, selmd->other);
 	focus(NULL);
 }
 
