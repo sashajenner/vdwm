@@ -45,11 +45,11 @@ static const Layout layouts[] = {
 
 /* key definitions */
 #define MODKEY Mod1Mask
-#define TAGKEYS(KEY,TAG) \
-	{ MODKEY,                       KEY,      view,           {.ui = 1 << TAG} }, \
-	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
-	{ MODKEY|ShiftMask,             KEY,      tag,            {.ui = 1 << TAG} }, \
-	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
+#define TAGKEYS(MOD,KEY,TAG) \
+	{ MOD,                       KEY,      view,           {.ui = 1 << TAG} }, \
+	{ MOD|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
+	{ MOD|ShiftMask,             KEY,      tag,            {.ui = 1 << TAG} }, \
+	{ MOD|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
@@ -66,9 +66,10 @@ static const Mode modes[NMODE]; // TODO is this bad?
 
 static Key insertkeys[] = {
 	/* modifier                     key        function        argument */
+	{ MODKEY,                       XK_Escape, setmode,        {.v = &modes[0]} },
+    /*
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
-	{ MODKEY|ShiftMask,             XK_semicolon, spawn,       {.v = vdwmcmd } },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
@@ -90,17 +91,17 @@ static Key insertkeys[] = {
 	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
 	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
-	TAGKEYS(                        XK_1,                      0)
-	TAGKEYS(                        XK_2,                      1)
-	TAGKEYS(                        XK_3,                      2)
-	TAGKEYS(                        XK_4,                      3)
-	TAGKEYS(                        XK_5,                      4)
-	TAGKEYS(                        XK_6,                      5)
-	TAGKEYS(                        XK_7,                      6)
-	TAGKEYS(                        XK_8,                      7)
-	TAGKEYS(                        XK_9,                      8)
+	TAGKEYS(MODKEY,                 XK_1,                      0)
+	TAGKEYS(MODKEY,                 XK_2,                      1)
+	TAGKEYS(MODKEY,                 XK_3,                      2)
+	TAGKEYS(MODKEY,                 XK_4,                      3)
+	TAGKEYS(MODKEY,                 XK_5,                      4)
+	TAGKEYS(MODKEY,                 XK_6,                      5)
+	TAGKEYS(MODKEY,                 XK_7,                      6)
+	TAGKEYS(MODKEY,                 XK_8,                      7)
+	TAGKEYS(MODKEY,                 XK_9,                      8)
 	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
-	{ MODKEY,                       XK_Escape, setmode,        {.v = &modes[0]} },
+    */
 };
 
 static Key normalkeys[] = {
@@ -111,13 +112,14 @@ static Key normalkeys[] = {
 	{ 0,                            XK_b,      togglebar,      {0} },
 	{ 0,                            XK_j,      focusstack,     {.i = +1 } },
 	{ 0,                            XK_k,      focusstack,     {.i = -1 } },
-	//{ 0,                            XK_i,      incnmaster,     {.i = +1 } },
-	//{ 0,                            XK_d,      incnmaster,     {.i = -1 } },
+	{ ShiftMask,                    XK_i,      incnmaster,     {.i = +1 } },
+	{ ShiftMask,                    XK_d,      incnmaster,     {.i = -1 } },
 	{ 0,                            XK_h,      setmfact,       {.f = -0.05} },
 	{ 0,                            XK_l,      setmfact,       {.f = +0.05} },
 	{ 0,                            XK_Return, zoom,           {0} },
 	{ 0,                            XK_Tab,    view,           {0} },
 	{ ShiftMask,                    XK_c,      killclient,     {0} },
+	{ 0,                            XK_i,      setmode,        {.v = &modes[1]} },
 	{ 0,                            XK_t,      setlayout,      {.v = &layouts[0]} },
 	{ 0,                            XK_f,      setlayout,      {.v = &layouts[1]} },
 	{ 0,                            XK_m,      setlayout,      {.v = &layouts[2]} },
@@ -129,27 +131,24 @@ static Key normalkeys[] = {
 	{ 0,                            XK_period, focusmon,       {.i = +1 } },
 	{ ShiftMask,                    XK_comma,  tagmon,         {.i = -1 } },
 	{ ShiftMask,                    XK_period, tagmon,         {.i = +1 } },
-    /*
-	TAGKEYS(                        XK_1,                      0)
-	TAGKEYS(                        XK_2,                      1)
-	TAGKEYS(                        XK_3,                      2)
-	TAGKEYS(                        XK_4,                      3)
-	TAGKEYS(                        XK_5,                      4)
-	TAGKEYS(                        XK_6,                      5)
-	TAGKEYS(                        XK_7,                      6)
-	TAGKEYS(                        XK_8,                      7)
-	TAGKEYS(                        XK_9,                      8)
-    */
+	TAGKEYS(0,                      XK_1,                      0)
+	TAGKEYS(0,                      XK_2,                      1)
+	TAGKEYS(0,                      XK_3,                      2)
+	TAGKEYS(0,                      XK_4,                      3)
+	TAGKEYS(0,                      XK_5,                      4)
+	TAGKEYS(0,                      XK_6,                      5)
+	TAGKEYS(0,                      XK_7,                      6)
+	TAGKEYS(0,                      XK_8,                      7)
+	TAGKEYS(0,                      XK_9,                      8)
 	{ ShiftMask,                    XK_q,      quit,           {0} },
-	{ 0,                            XK_i,      setmode,        {.v = &modes[1]} },
 };
 
-#define ALLBIND(KEYS) KEYS, LENGTH(KEYS)
+#define BINDALL(KEYS) KEYS, LENGTH(KEYS)
 /* mode(s) */
 static const Mode modes[NMODE] = {
-	/* symbol    key bindings            allow other keys */
-	{ "",        ALLBIND(normalkeys),    0 }, /* first entry is default */
-	{ "INS",     ALLBIND(insertkeys),    1 },
+	/* symbol    key bindings         allow other keys */
+	{ "",        BINDALL(normalkeys),    0 }, /* first entry is default */
+	{ "INS",     BINDALL(insertkeys),    1 },
 };
 
 /* button definitions */

@@ -1008,15 +1008,15 @@ keypress(XEvent *e)
 	unsigned int i;
 	KeySym keysym;
 	XKeyEvent *ev;
-    const Key *keys = selmd->keys;
+    const Mode *md = selmd;
 
 	ev = &e->xkey;
 	keysym = XKeycodeToKeysym(dpy, (KeyCode)ev->keycode, 0);
-	for (i = 0; i < selmd->nkeys; i++)
-		if (keysym == keys[i].keysym
-		&& CLEANMASK(keys[i].mod) == CLEANMASK(ev->state)
-		&& keys[i].func)
-			keys[i].func(&(keys[i].arg));
+	for (i = 0; i < md->nkeys; i++)
+		if (keysym == md->keys[i].keysym
+		&& CLEANMASK(md->keys[i].mod) == CLEANMASK(ev->state)
+		&& md->keys[i].func)
+			md->keys[i].func(&(md->keys[i].arg));
 }
 
 void
@@ -1551,12 +1551,14 @@ void
 setmode(const Arg *arg)
 {
 	Monitor *m;
+    const Mode *md;
 
 	if (arg && arg->v) {
-		selmd = (Mode *)arg->v;
-        grabkeys(selmd->keys, selmd->nkeys, selmd->other);
+		selmd = (const Mode *)arg->v;
+		md = (const Mode *)arg->v; // TODO necessary since selmd global?
+        grabkeys(md->keys, md->nkeys, md->other);
 		for (m = mons; m; m = m->next) {
-			strncpy(m->mdsymbol, selmd->symbol, sizeof m->mdsymbol);
+			strncpy(m->mdsymbol, md->symbol, sizeof m->mdsymbol);
 			drawbar(m);
 		}
 	}
