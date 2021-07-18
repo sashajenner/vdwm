@@ -1,6 +1,15 @@
-dwm - dynamic window manager
-============================
+vdwm - (vim) dynamic window manager
+===================================
 dwm is an extremely fast, small, and dynamic window manager for X.
+
+vdwm is a patch of dwm which emulates vim modes (normal and insert).
+However, a different mode setup can easily be configured.
+
+
+Warning
+-------
+This patch is quite annoying as is, since usually not much consecutive
+interaction with a window manager is done.
 
 
 Requirements
