@@ -62,12 +62,12 @@ static const char *termcmd[]  = { "st", NULL };
 
 /* mode definitions */
 #define NMODE (2) /* number of modes */
-static const Mode modes[NMODE]; // TODO is this bad?
+static const Mode modes[NMODE]; /* TODO is this bad? */
 
 static Key insertkeys[] = {
 	/* modifier                     key        function        argument */
 	{ MODKEY,                       XK_Escape, setmode,        {.v = &modes[0]} },
-    /*
+	/*
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
@@ -101,7 +101,7 @@ static Key insertkeys[] = {
 	TAGKEYS(MODKEY,                 XK_8,                      7)
 	TAGKEYS(MODKEY,                 XK_9,                      8)
 	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
-    */
+	*/
 };
 
 static Key normalkeys[] = {
@@ -146,7 +146,7 @@ static Key normalkeys[] = {
 #define BINDALL(KEYS) KEYS, LENGTH(KEYS)
 /* mode(s) */
 static const Mode modes[NMODE] = {
-	/* symbol    key bindings         allow other keys */
+	/* symbol    key bindings            allow other keys */
 	{ "",        BINDALL(normalkeys),    0 }, /* first entry is default */
 	{ "INS",     BINDALL(insertkeys),    1 },
 };

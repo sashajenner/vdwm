@@ -115,7 +115,7 @@ typedef struct {
 	const char *symbol;
 	Key *keys;
 	unsigned int nkeys;
-    int other;
+	int other;
 } Mode;
 
 struct Monitor {
@@ -740,10 +740,10 @@ drawbar(Monitor *m)
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
-    if (strcmp(m->mdsymbol, "")) {
-        w = blw = TEXTW(m->mdsymbol) - lrpad / 2;
-        x = drw_text(drw, x, 0, w, bh, 0, m->mdsymbol, 0);
-    }
+	if (strcmp(m->mdsymbol, "")) {
+		w = blw = TEXTW(m->mdsymbol) - lrpad / 2;
+		x = drw_text(drw, x, 0, w, bh, 0, m->mdsymbol, 0);
+	}
 
 	if ((w = m->ww - tw - x) > bh) {
 		if (m->sel) {
@@ -967,20 +967,20 @@ grabkeys(const Key *keys, unsigned int nkeys, int other)
 {
 	updatenumlockmask();
 	{
-        if (other) {
-            unsigned int i, j;
-            unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
-            KeyCode code;
+		if (other) {
+			unsigned int i, j;
+			unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
+			KeyCode code;
 
-            XUngrabKey(dpy, AnyKey, AnyModifier, root);
-            if (keys)
-                for (i = 0; i < nkeys; i++)
-                    if ((code = XKeysymToKeycode(dpy, keys[i].keysym)))
-                        for (j = 0; j < LENGTH(modifiers); j++)
-                            XGrabKey(dpy, code, keys[i].mod | modifiers[j], root,
-                                True, GrabModeAsync, GrabModeAsync);
-        } else
-            XGrabKey(dpy, AnyKey, AnyModifier, root, True, GrabModeAsync, GrabModeAsync);
+			XUngrabKey(dpy, AnyKey, AnyModifier, root);
+			if (keys)
+				for (i = 0; i < nkeys; i++)
+					if ((code = XKeysymToKeycode(dpy, keys[i].keysym)))
+						for (j = 0; j < LENGTH(modifiers); j++)
+							XGrabKey(dpy, code, keys[i].mod | modifiers[j], root,
+								True, GrabModeAsync, GrabModeAsync);
+		} else
+			XGrabKey(dpy, AnyKey, AnyModifier, root, True, GrabModeAsync, GrabModeAsync);
 	}
 }
 
@@ -1009,7 +1009,7 @@ keypress(XEvent *e)
 	unsigned int i;
 	KeySym keysym;
 	XKeyEvent *ev;
-    const Mode *md = selmd;
+	const Mode *md = selmd;
 
 	ev = &e->xkey;
 	keysym = XKeycodeToKeysym(dpy, (KeyCode)ev->keycode, 0);
@@ -1552,12 +1552,12 @@ void
 setmode(const Arg *arg)
 {
 	Monitor *m;
-    const Mode *md;
+	const Mode *md;
 
 	if (arg && arg->v) {
 		selmd = (const Mode *)arg->v;
-		md = (const Mode *)arg->v; // TODO necessary since selmd global?
-        grabkeys(md->keys, md->nkeys, md->other);
+		md = (const Mode *)arg->v; /* TODO necessary since selmd global? */
+		grabkeys(md->keys, md->nkeys, md->other);
 		for (m = mons; m; m = m->next) {
 			strncpy(m->mdsymbol, md->symbol, sizeof m->mdsymbol);
 			drawbar(m);
@@ -1575,8 +1575,8 @@ setup(void)
 	/* clean up any zombies immediately */
 	sigchld(0);
 
-    /* init mode */
-    selmd = &modes[0];
+	/* init mode */
+	selmd = &modes[0];
 
 	/* init screen */
 	screen = DefaultScreen(dpy);
@@ -1634,7 +1634,7 @@ setup(void)
 		|LeaveWindowMask|StructureNotifyMask|PropertyChangeMask;
 	XChangeWindowAttributes(dpy, root, CWEventMask|CWCursor, &wa);
 	XSelectInput(dpy, root, wa.event_mask);
-    grabkeys(selmd->keys, selmd->nkeys, selmd->other);
+	grabkeys(selmd->keys, selmd->nkeys, selmd->other);
 	focus(NULL);
 }
 
