@@ -106,6 +106,7 @@ static Key insertkeys[] = {
 
 static Key normalkeys[] = {
 	/* modifier                     key        function        argument */
+	{ 0,                            XK_i,      setmode,        {.v = &modes[1]} },
 	{ 0,                            XK_p,      spawn,          {.v = dmenucmd } },
 	{ ShiftMask,                    XK_Return, spawn,          {.v = termcmd } },
 	{ ShiftMask,                    XK_semicolon, spawn,       {.v = vdwmcmd } },
@@ -119,7 +120,6 @@ static Key normalkeys[] = {
 	{ 0,                            XK_Return, zoom,           {0} },
 	{ 0,                            XK_Tab,    view,           {0} },
 	{ ShiftMask,                    XK_c,      killclient,     {0} },
-	{ 0,                            XK_i,      setmode,        {.v = &modes[1]} },
 	{ 0,                            XK_t,      setlayout,      {.v = &layouts[0]} },
 	{ 0,                            XK_f,      setlayout,      {.v = &layouts[1]} },
 	{ 0,                            XK_m,      setlayout,      {.v = &layouts[2]} },

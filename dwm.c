@@ -740,9 +740,10 @@ drawbar(Monitor *m)
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
-    // TODO is this ok?
-	w = blw = TEXTW(m->mdsymbol);
-	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->mdsymbol, 0);
+    if (strcmp(m->mdsymbol, "")) {
+        w = blw = TEXTW(m->mdsymbol) - lrpad / 2;
+        x = drw_text(drw, x, 0, w, bh, 0, m->mdsymbol, 0);
+    }
 
 	if ((w = m->ww - tw - x) > bh) {
 		if (m->sel) {
